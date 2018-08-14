@@ -1,4 +1,3 @@
-Function Start-HDTools {
 <#
     .SYNOPSIS
     A collection of tools and links used by the The Save Mart Companies' IT Support team. 
@@ -57,7 +56,7 @@ Function Start-HDTools {
         Write-Host "     [VWL] CS/FL EventLogs           [VNC] UltraVNC Viewer            "            -ForegroundColor 'White'
         Write-Host "     [DCHP] DHCP In Stores           [LBU] CS/FL - Last Boot Up Time  "            -ForegroundColor 'White'
         Write-Host "     [TMS] TMS Administrator         [TSM] Terminal Services Manager  "            -ForegroundColor 'White'
-        Write-Host "     [ASW] ASW Shell                                                  "            -ForegroundColor 'White'
+        Write-Host "     [ASW] ASW Shell                 [RBC] Reboot Count               "            -ForegroundColor 'White'
         Write-Host ""                                               
         Write-Host ""
         Write-Host ""
@@ -76,7 +75,7 @@ Function Start-HDTools {
         Show-HDToolsMainMenu
         [ValidateSet("Install", "Update", "SM", "SMAD2", "SI", "HH", "Dir+", "RA", "Slack", "Nagios", "Ctx", "Iris", "S401",`
         "S402", "PM", "1Off", "IW", "VL", "RDP", "PS", "SMS", "FMS", "DIR", "UCCX", "CS", "AS", "DHCP", "VNC", "TMS", "TSM",`
-        "ASW", "Tammy", "Quit", "VWL", "LBU")]   
+        "ASW", "Tammy", "Quit", "VWL", "LBU", "RBC")]   
         [String]$mainSel = Read-Host
         switch ($mainSel) {
 <# Workstation Menu Starts #>
@@ -342,32 +341,51 @@ Function Start-HDTools {
             Start-Process -FilePath 'https://goo.gl/c4F39N' #Connected Payments
             Start-Process -Filepath 'https://goo.gl/CbfJqb' #UCCX
             }
-		    'Unlock' { 	Function unlock-hdaccount {
-						    $id = Read-host -prompt "What is the login id?"
-						    unlock-adaccount -Identity $id -server corp-dc1
-						    }
-					    unlock-hdaccount
-					    Write-output "The account $id has been unlocked." }
-		    'RPW' { Function Reset-HDadpassword {
-					    $rpwid = Read-Host -Prompt "What is the SM Lan username?"
-					    $rpwnewpassword = Read-Host -prompt "Please provide a temporary password" -AsSecureString
-					    Set-ADaccountpassword -identity $rpwid `
-										      -Newpassword $rpwnewpassword `
-										      -Server Corp-DC1 `
-										      -Confirm:$false `
-										      -Reset `
-										      -Verbose;
-					    Set-ADUser -Identity $Identity -ChangePasswordAtLogon:$True -verbose
-					    Write-Output "Password for $identity was successfully changed."
- 				    }
-				    Reset-HDadpassword
-			      }
+	    'Unlock' { 	Function unlock-hdaccount {
+					    $id = Read-host -prompt "What is the login id?"
+					    unlock-adaccount -Identity $id -server corp-dc1
+					    }
+				    unlock-hdaccount
+				    Write-output "The account $id has been unlocked." }
+	    'RPW' { Function Reset-HDadpassword {
+				    $rpwid = Read-Host -Prompt "What is the SM Lan username?"
+				    $rpwnewpassword = Read-Host -prompt "Please provide a temporary password" -AsSecureString
+				    Set-ADaccountpassword -identity $rpwid `
+									      -Newpassword $rpwnewpassword `
+									      -Server Corp-DC1 `
+									      -Confirm:$false `
+									      -Reset `
+									      -Verbose;
+				    Set-ADUser -Identity $Identity -ChangePasswordAtLogon:$True -verbose
+				    Write-Output "Password for $identity was successfully changed."
+			    }
+			    Reset-HDadpassword
+		      }
+	 'LBU' { Function Show-HDRebootNumber {
+                    Invoke-Command {
+                    $RegHostName = Read-Host -Prompt 'What is the Register or Fast Lane Host Name?'
+                    $RegLocalUser = Read-host -Prompt "What is the Register or Fast Lane's local user name?" 
+                    Get-WmiObject -Class Win32_OperatingSystem -ComputerName $RegHostName -Credential $RegLocalUser | 
+                    Select PSComputername, @{n='BootUpTime';e={$_.ConvertToDateTime($_.LastBootUpTime)}}} |
+                    Select PSComputerName, BootUpTime
+                    }
+                Show-HDRebootNumber
+              }
+
+        'RBC' { Function Get-HDRebootCount{ 
+                    $FromDate = Read-Host "What is the start date for the search range? "
+                    $ToDate = Read-Host "What is the to date for the search range? "
+                    $RBCHostName = Read-Host "What is the register or fast lane's hostname? "
+                    $RBCUsername = Read-Host "What is the register or fast lane's local username? "
+
+                    Get-WinEvent -LogName System  -ComputerName $RBCHostName -Credential $RBCUsername | 
+                    Where {$_.id -eq 6005 -and ($_.TimeCreated -gt "$FromDate" -and $_.TimeCreated -lt "$ToDate")}
+                }
+                Get-HDRebootCount
+}
     <# Testing Ends #>
 
             }
     pause
     }
     Until ($mainSel -eq 'quit')
-}
-
-Start-HDTools
