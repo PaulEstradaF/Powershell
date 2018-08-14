@@ -1,0 +1,28 @@
+<#
+.SYNOPSIS
+This tool queries an xml document for tags/keywords to retrieve contact or support 
+information.
+.DESCRIPTION 
+This tool retrieves the name, contact number, and any other information we have 
+available to provide support or redirect our caller/customer. It queries an XML
+document located in C:\HDTools\XML. The information was gathered from information 
+shared by different Save Mart IT Support Agents. You can use built in powershell 
+commands to sort or format the information retrieved. 
+.PARAMETER Tag
+The Tag parameter is mandatory. It has an Alias, 'Keyword'.
+.EXAMPLE
+Get-HDDirectory -Tag hd
+#>
+[CmdletBinding]
+Function Get-HDDirectory {
+    param(
+        [Parameter(Mandatory=$true)]
+        [Alias('Keyword')]
+        [String]$Tag
+    )
+
+    [xml]$xml = Get-Content -Path "C:\HDTool\XML\HDDirectory.xml"
+    $xml.HDDirectory.entry | Where -Property tags -Like "*$tag*" | 
+    select Name, ContactInfo, OtherInfo | 
+    Write-Output 
+}
