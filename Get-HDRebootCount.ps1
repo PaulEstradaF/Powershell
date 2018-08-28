@@ -20,8 +20,9 @@
                 
     foreach ($RBCHostname in $RBCHostNames) {
 	    Get-WinEvent -Filterhashtable @{logname='System'; 
-									    id='12';} `
-					    -ComputerName $RBCHostName -Credential $Credential |
+					    id='12';} `
+			 -ComputerName $RBCHostName `
+			 -Credential $Credential |
 	    Where {$_.TimeCreated -gt "$FromDate" -and $_.TimeCreated -lt "$ToDate"} |
 	    Select Timecreated, ID, MachineName, Message
         }
