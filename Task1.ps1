@@ -6,7 +6,7 @@ foreach ($Computer in $Computers) {
     Write-Host " Working with $Computer." -ForegroundColor Blue -BackgroundColor Yellow
     Write-Output ""
     
-    if ($Register -like 'CompLoc*D'){
+    if ($Computer -like 'CompLoc*D'){
         Write-Host "  This is a Computer." -BackgroundColor White -ForegroundColor DarkRed
         $Creds = $Creds2
     } else {
