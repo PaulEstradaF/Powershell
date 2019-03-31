@@ -1,4 +1,4 @@
-$Computers = Get-Content C:\Powershell\Store0726pos_Registers.txt
+$Computers = Get-Content C:\Powershell\testFileWithServerinfo.txt
 $Creds1 = Get-Credential -Credential Creds1
 $Creds2 = Get-Credential -Credential Creds2
 
