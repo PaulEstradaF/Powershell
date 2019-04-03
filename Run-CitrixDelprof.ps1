@@ -1,4 +1,26 @@
 function Run-CitrixDelprof {
+<#
+    .Synopsis
+    Deletes all or targeted local profiles on citrixhosts.
+    .DESCRIPTION
+    Uses the ImportExcel module to import an excel sheet that has all citrix host
+    server information broken down by delivery group. You use the -DeliveryGroup parameter
+    to select the delivery group you want to target. You can also use the
+    .PARAMETER ComputerName
+    The name of the register to query. Accepts multiple values 
+    and accepts pipeline input
+    .PARAMETER IPAddress
+    The IP Address to query. Accepts multiple values but not pipeline input.
+    .PARAMETER ShowProgress
+    displays a progress bar showing current operations and percent complete.
+    Percentage will be inaccurate when piping computer names into the command.
+    .EXAMPLE
+    .EXAMPLE
+    .EXAMPLE
+    .LINK
+    
+#>
+
     [Cmdletbinding()]
     param (
     [parameter(mandatory=$True)]
