@@ -1,9 +1,9 @@
-$Users = Import-Excel -Path C:\MSAShared\KronosUsers.xlsx
+$Users = Import-Excel -Path C:\sharedFolder\file.xlsx
 
 foreach ($user in $users) {
     $Password = $user.password 
     $SecurePassword = ConvertTo-SecureString $Password -AsPlainText -Force
-    $UPN = $user.username + '@SM.Lan'
+    $UPN = $user.username + '@Lan'
 
     Write-Host " starting account creating."
 
@@ -16,7 +16,5 @@ foreach ($user in $users) {
                -Enabled $True `
                -DisplayName $user.Username 
     
-    Add-ADGroupMember -Identity 'win10essbase' -Members $user.Username
-    #Set-ADAccountPassword -NewPassword $SecurePassword -Server Corp-DC1.SM.Lan 
-
+    Add-ADGroupMember -Identity 'aDGroup' -Members $user.Username
 }
