@@ -2,41 +2,58 @@
 #(Additional services can be signed into on M365 but are commented out for lack of necessity for this script)
 #1: Block Cloud Sign on
 #2: Sign out all sessions
-#3: Disable On-Premise AD Account
-#4: Update description with "Offboarded %DATE% By: %USERID%"
-#5: Change  "msExchHideFromAddressLists" to true
-#6: Clear Reports to attribute
-#7: Clears Reports to Attribute of all direct reports
-#8: Copies results to clipboard to be pasted into ticket. 
+#3: Sets an automatic response with the managers name and email address
+#4: Sets an automatic forward to the managers account. 
+#5: Disable On-Premise AD Account
+#6: Update description with "Offboarded %DATE% By: %USERID%"
+#7: Change  "msExchHideFromAddressLists" to true
+#8: Clear Reports to attribute
+#9: Clears Reports to Attribute of all direct reports
+#10: Copies results to clipboard to be pasted into ticket. 
 
 $orgName="savemartsupermarkets"
 $credential = Get-Credential -Message "Office365 Signin"
+
 #Azure Active Directory
+Connect-AzureAD -Credential $Credential
 Connect-MsolService -Credential $credential
+
 #SharePoint Online
 Import-Module Microsoft.Online.SharePoint.PowerShell -DisableNameChecking
 Connect-SPOService -Url https://$orgName-admin.sharepoint.com -credential $credential
+
 #Skype for Business Online
 #Import-Module MicrosoftTeams
 #Connect-MicrosoftTeams -Credential $credential
 #Exchange Online
 #Import-Module ExchangeOnlineManagement
-#Connect-ExchangeOnline -Credential $credential -ShowProgress $true
+Connect-ExchangeOnline -Credential $credential -ShowProgress $true
 #Security & Compliance Center
 #Connect-IPPSSession -Credential $credential
 #Teams
 #Import-Module MicrosoftTeams
 #Connect-MicrosoftTeams -Credential $credential
 
-#Get admin inf 
+#Get admin information
 $admin = (whoami).trim("sm\")
 $date = date -Format d
 
 #Get User-Id to Off-board
 $EmpNumber = Read-Host -Prompt 'What is the users Employee #?'
 
-#Load Employee Ino
+#Load Employee Info
 $User = get-aduser -identity $EmpNumber -Properties *
+$name = $user.Name
+$email = $user.mail
+$manager = get-aduser $user.manager -Properties *
+$ManagerName = $manager.Name
+$manageremail = $manager.mail
+
+#Set Email Autoresponse
+Set-mailbox $email -ForwardingAddress $manageremail
+
+#Set Automatic Reply
+Set-MailboxAutoReplyConfiguration -Identity $user.SamAccountName -AutoReplyState Enabled -InternalMessage "This mailbox is no longer available, if you need further assistance please reach out to $ManagerName for further assistance @ $manageremail. Thank you." -ExternalAudience All -ExternalMessage "This mailbox is no longer available, if you need further assistance please reach out to $ManagerName for further assistance @ $manageremail. Thank you."
 
 #Signout Sharepoint and OneDrive Sessions
 Revoke-SPOUserSession -User $User.UserPrincipalName
@@ -65,5 +82,5 @@ foreach ($dr in $directreports) {
     set-aduser -Identity $dr1.SamAccountName -Manager $managersam.SamAccountname
     }
 set-aduser -Identity $empnumber -Manager $null
-Write-Output 'User has been blocked from sign ons in the cloud, signed out of M365 sessions, disabled in on-premise AD, hidden from address book, description updated, moved to offboarded OU, manager cleared, and all direct reports have had their manager changed to their managers manager.' | set-clipboard
+write-output "$Name has been blocked from sign ons in the cloud, signed out of M365 sessions, disabled in on-premise AD, hidden from address book, an automatic email response has been generated instructing to send all mail to $ManagerName at $manageremail, an autoforward of all email $ManagerName has been created, description updated, moved to offboarded OU, manager cleared, and all direct reports have had their manager changed to their managers manager." | set-clipboard
 Write-Output "Script Completed, Results Copied to Clipboard, please paste in notes of ticket." 
