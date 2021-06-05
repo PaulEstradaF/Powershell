@@ -2,17 +2,23 @@
 #(Additional services can be signed into on M365 but are commented out for lack of necessity for this script)
 #1: Block Cloud Sign on
 #2: Sign out all sessions
-#3: Sets an automatic response with the managers name and email address
-#4: Sets an automatic forward to the managers account. 
-#5: Disable On-Premise AD Account
-#6: Update description with "Offboarded %DATE% By: %USERID%"
-#7: Change  "msExchHideFromAddressLists" to true
-#8: Clear Reports to attribute
-#9: Clears Reports to Attribute of all direct reports
-#10: Copies results to clipboard to be pasted into ticket. 
+#3: Sign out of WVD
+#4: Sets an automatic response with the managers name and email address
+#5: Sets an automatic forward to the managers account. 
+#6: Sets the manager as an owner on the users onedrive
+#7: Disable On-Premise AD Account
+#8: Update description with "Offboarded %DATE% By: %USERID%"
+#9: Change  "msExchHideFromAddressLists" to true
+#10: Clear Reports to attribute
+#11: Clears Reports to Attribute of all direct reports
+#12: Send email to users manager with informing off the offboard as well as including link to users ondrive files. 
+#13: Copies results to clipboard to be pasted into ticket. 
 
 $orgName="savemartsupermarkets"
 $credential = Get-Credential -Message "Office365 Signin"
+
+#SMTP Server
+$PSEmailServer = smtp.sm.lan
 
 #Azure Active Directory
 Connect-AzureAD -Credential $Credential
@@ -26,17 +32,40 @@ Connect-SPOService -Url https://$orgName-admin.sharepoint.com -credential $crede
 #Import-Module MicrosoftTeams
 #Connect-MicrosoftTeams -Credential $credential
 #Exchange Online
+
 #Import-Module ExchangeOnlineManagement
 Connect-ExchangeOnline -Credential $credential -ShowProgress $true
+
 #Security & Compliance Center
 #Connect-IPPSSession -Credential $credential
 #Teams
 #Import-Module MicrosoftTeams
 #Connect-MicrosoftTeams -Credential $credential
 
+#Connect to WVD Environment
+add-rdsaccount -Credential $credential -DeploymentUrl https://rdbroker.wvd.microsoft.com
+$my = [PSCustomObject]@{
+ 
+    # Shouldn't need to change these
+    AzureSubscriptionID = "f339d543-8e8b-4b30-985a-093f9dd13768";
+    AADTenantID    = "880f5112-d912-4029-b742-b1edf8c834b1";
+    # Don't change these default names or it'll break stuff
+    TenantGroupName     = "Default Tenant Group";
+    AppGroupName        = "Desktop Application Group";
+    # Update these as needed
+    TenantCreator       = "AzureWVD@savemart.com"
+    TenantName          = "WVD-PROD-TENANT-01";
+    HostPoolName        = "WVD-PROD-HOSTPOOL-01";
+    TenantFriendlyName  = "Save Mart Tenant";
+    AppGroupFriendlyName= "Desktop Session"; } 
+ 
+
 #Get admin information
 $admin = (whoami).trim("sm\")
-$date = date -Format d
+$adminBaseUPN = ($admin).trim("adm")
+$adminbase = get-aduser -identity $adminBaseUPN -Properties *
+$date = date -Format f
+
 
 #Get User-Id to Off-board
 $EmpNumber = Read-Host -Prompt 'What is the users Employee #?'
@@ -45,18 +74,30 @@ $EmpNumber = Read-Host -Prompt 'What is the users Employee #?'
 $User = get-aduser -identity $EmpNumber -Properties *
 $name = $user.Name
 $email = $user.mail
+$UserUPN = $user.UserPrincipalName
+$UserSAM = $user.SamAccountName
 $manager = get-aduser $user.manager -Properties *
 $ManagerName = $manager.Name
 $manageremail = $manager.mail
+$ODurl = "https://savemartsupermarkets-my.sharepoint.com/personal/${UserSAM}_savemart_com"
 
-#Set Email Autoresponse
-Set-mailbox $email -ForwardingAddress $manageremail
+#Set Email Auto-Forward
+#Set-mailbox $email -ForwardingAddress $manageremail
+#Set-mailbox $email -ForwardingAddress $null
 
 #Set Automatic Reply
-Set-MailboxAutoReplyConfiguration -Identity $user.SamAccountName -AutoReplyState Enabled -InternalMessage "This mailbox is no longer available, if you need further assistance please reach out to $ManagerName for further assistance @ $manageremail. Thank you." -ExternalAudience All -ExternalMessage "This mailbox is no longer available, if you need further assistance please reach out to $ManagerName for further assistance @ $manageremail. Thank you."
+#Set-MailboxAutoReplyConfiguration -Identity $user.SamAccountName -AutoReplyState Enabled -InternalMessage "Thank you for reaching out.  I am no longer with The Save Mart Companies. For assistance, please contact $ManagerName at $manageremail." -ExternalAudience All -ExternalMessage "Thank you for reaching out.  I am no longer with The Save Mart Companies. For assistance, please contact $ManagerName at $manageremail."
+
+#Add Manager as OneDrive Secondary Owner
+Set-SPOUser -Site $ODurl -LoginName $Manager.UserPrincipalName -IsSiteCollectionAdmin $True -ErrorAction SilentlyContinue
+#Get-SPOUser -site $ODurl | Select LoginName,IsSiteAdmin | Where-Object {$_.IsSiteAdmin -eq 'True'}
 
 #Signout Sharepoint and OneDrive Sessions
-Revoke-SPOUserSession -User $User.UserPrincipalName
+Revoke-SPOUserSession -User $User.UserPrincipalName -Confirm:$false
+
+#Sign out of any WVD Sessions:
+Get-RdsUserSession -TenantName "WVD-PROD-TENANT-01" -HostPoolName "WVD-PROD-HOSTPOOL-01" | Where-Object UserPrincipalName -eq "$UserUPN"# | Invoke-RdsUserSessionLogoff
+
 
 #Block AzureAD Login
 Set-AzureADUser -ObjectId $User.UserPrincipalName -AccountEnabled $False
@@ -82,5 +123,26 @@ foreach ($dr in $directreports) {
     set-aduser -Identity $dr1.SamAccountName -Manager $managersam.SamAccountname
     }
 set-aduser -Identity $empnumber -Manager $null
-write-output "$Name has been blocked from sign ons in the cloud, signed out of M365 sessions, disabled in on-premise AD, hidden from address book, an automatic email response has been generated instructing to send all mail to $ManagerName at $manageremail, an autoforward of all email $ManagerName has been created, description updated, moved to offboarded OU, manager cleared, and all direct reports have had their manager changed to their managers manager." | set-clipboard
+
+#Email Variables
+$Subject = "Offboard of $name"
+$from = "PlatformEngineering@SaveMart.com"
+
+#MessageBody
+$MessageBody = @"
+$managername,
+$name has been offboarded effective $date. As part of this process you have been granted owner access to the users OneDrive Account. 
+You may access that via this link: $ODUrl 
+
+We have also included an autoforward of all email sent to $email to your email address and an auto-reponse stating:
+Thank you for reaching out.  I am no longer with The Save Mart Companies. For assistance, please contact $ManagerName at $manageremail
+
+If you have any questions please feel free to reach out to the HelpDesk.
+
+Thank You,
+Platform Engineering
+"@
+
+Send-MailMessage -From $from -To $manageremail -Subject $Subject -Body $MessageBody -SmtpServer $PSEmailServer -Credential $credential
+write-output "$Name has been blocked from sign ons in the cloud, signed out of M365 sessions, disabled in on-premise AD, hidden from address book, an automatic email response has been generated instructing to send all mail to $ManagerName at $manageremail, an autoforward of all email $ManagerName has been created, the manager has been set as an additional owner on the onedrive files, an email has been sent to the manager informing them of the auto-reply, the auto-forward, onedrive ownership, and including a link to the onedrive files, the description updated, moved to offboarded OU, manager cleared, and all direct reports have had their manager changed to their managers manager." | set-clipboard
 Write-Output "Script Completed, Results Copied to Clipboard, please paste in notes of ticket." 
