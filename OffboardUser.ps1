@@ -14,11 +14,11 @@
 #12: Send email to users manager with informing off the offboard as well as including link to users ondrive files. 
 #13: Copies results to clipboard to be pasted into ticket. 
 
-$orgName="savemartsupermarkets"
+$orgName="ORGNAME"
 $credential = Get-Credential -Message "Office365 Signin"
 
 #SMTP Server
-$PSEmailServer = smtp.sm.lan
+$PSEmailServer = SMTP SERVER
 
 #Azure Active Directory
 Connect-AzureAD -Credential $Credential
@@ -47,16 +47,16 @@ add-rdsaccount -Credential $credential -DeploymentUrl https://rdbroker.wvd.micro
 $my = [PSCustomObject]@{
  
     # Shouldn't need to change these
-    AzureSubscriptionID = "f339d543-8e8b-4b30-985a-093f9dd13768";
-    AADTenantID    = "880f5112-d912-4029-b742-b1edf8c834b1";
+    AzureSubscriptionID = "****";
+    AADTenantID    = "****";
     # Don't change these default names or it'll break stuff
     TenantGroupName     = "Default Tenant Group";
     AppGroupName        = "Desktop Application Group";
     # Update these as needed
-    TenantCreator       = "AzureWVD@savemart.com"
-    TenantName          = "WVD-PROD-TENANT-01";
-    HostPoolName        = "WVD-PROD-HOSTPOOL-01";
-    TenantFriendlyName  = "Save Mart Tenant";
+    TenantCreator       = "***"
+    TenantName          = "***";
+    HostPoolName        = "***";
+    TenantFriendlyName  = "***";
     AppGroupFriendlyName= "Desktop Session"; } 
  
 
@@ -79,7 +79,7 @@ $UserSAM = $user.SamAccountName
 $manager = get-aduser $user.manager -Properties *
 $ManagerName = $manager.Name
 $manageremail = $manager.mail
-$ODurl = "https://savemartsupermarkets-my.sharepoint.com/personal/${UserSAM}_savemart_com"
+$ODurl = "https://ORGINFO/personal/${UserSAM}_savemart_com"
 
 #Set Email Auto-Forward
 #Set-mailbox $email -ForwardingAddress $manageremail
@@ -96,7 +96,7 @@ Set-SPOUser -Site $ODurl -LoginName $Manager.UserPrincipalName -IsSiteCollection
 Revoke-SPOUserSession -User $User.UserPrincipalName -Confirm:$false
 
 #Sign out of any WVD Sessions:
-Get-RdsUserSession -TenantName "WVD-PROD-TENANT-01" -HostPoolName "WVD-PROD-HOSTPOOL-01" | Where-Object UserPrincipalName -eq "$UserUPN"# | Invoke-RdsUserSessionLogoff
+Get-RdsUserSession -TenantName "***" -HostPoolName "***" | Where-Object UserPrincipalName -eq "$UserUPN"# | Invoke-RdsUserSessionLogoff
 
 
 #Block AzureAD Login
@@ -109,7 +109,7 @@ Disable-ADAccount -Identity $EmpNumber
 get-aduser $EmpNumber -Properties Description | ForEach-Object { Set-ADUser $_ -Description "$($_.Description) --Offboarded on $date by $admin" }
 
 #Move User to Offboard OU
-Move-ADObject -Identity $user.DistinguishedName -TargetPath "OU=Offboard,OU=-SaveMart-,DC=SM,DC=LAN"
+Move-ADObject -Identity $user.DistinguishedName -TargetPath "OU=OU-FOR-OFFBOARDED-ACCOUNTS"
 
 #Hide User from Addresslist
 Set-ADUser -Identity $EmpNumber -Replace @{msExchHideFromAddressLists=$True}
@@ -126,7 +126,7 @@ set-aduser -Identity $empnumber -Manager $null
 
 #Email Variables
 $Subject = "Offboard of $name"
-$from = "PlatformEngineering@SaveMart.com"
+$from = "ADDRESS"
 
 #MessageBody
 $MessageBody = @"
