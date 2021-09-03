@@ -6,6 +6,10 @@
     Out-Null
 }; Load-SM.ExchangeCommands
 
+#Import ADSync
+Set-ExecutionPolicy Unrestricted -Force
+IPMO \\corp-archive1.sm.lan\SystemAdmins\PowerShell\Commands\start-sm_adsync.ps1
+
 #License Choice and Username variables
 Write-Host "Please choose a license for the user:"
 write-host "1: Office365 F3 (Generally used for Store accounts i.e. Gen, SBC, & RX)"
@@ -51,6 +55,9 @@ Add-ADGroupMember -Identity $LicenseName -members $EmpNumber
 #Move AD Object to Managers OU
 Move-ADObject -Identity $user -TargetPath $mgrou
 
+#Start AdSync 
+Start-Sm_ADSync
+
 #Expected Results
 echo $firstname
 echo $lastname
@@ -58,4 +65,4 @@ echo $email
 echo $Altemail
 echo $LicenseName Applied to $User.name
 echo User moved to $MgrOU
-write-output "$Firstname $Lastname has had a mailbox created, an online archive created, and an office365 license applied ($Licensename) and moved to the OU $mgrOU to match their manager $MgrClean" | set-clipboard 
+write-output "$Firstname $Lastname has had a mailbox created, an online archive created, and an office365 license applied ($Licensename) and moved to the OU $mgrOU to match their manager $MgrClean and an Azure Sync has been initiated." | set-clipboard 
