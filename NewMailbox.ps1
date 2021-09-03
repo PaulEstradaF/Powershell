@@ -20,8 +20,8 @@ $firstname = $user.givenname
 $lastname = $user.surname
 
 #Email Account Variables
-$email = "$EmpNumber@savemart.com"
-$AltEmail = "$EmpNumber@savemartsupermarkets.mail.onmicrosoft.com"
+$email = "$EmpNumber@REPLACEWITHDOMAIN"
+$AltEmail = "$EmpNumber@REPLACEWITHPROPERDOMAIN.mail.onmicrosoft.com"
 
 #Creation Of Mailboxes
 Enable-RemoteMailbox $email -RemoteRoutingAddress $AltEmail
