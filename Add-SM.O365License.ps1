@@ -1,4 +1,4 @@
-function Add-SM.O365License {
+function Add-O365License {
     [cmdletbinding()]
     param(
 	    [Parameter(mandatory=$True,
@@ -6,7 +6,7 @@ function Add-SM.O365License {
 	    $Identity,
         [switch]$Remove,
         [Parameter(Mandatory=$false)]
-        [ValidateSet("Office365-E3-Limited","Office365-E3-Full","Office365-F1-Store-ASM","Office365-F1")]
+        [ValidateSet("Group1","Group2","Group3","Group4")]
         [AllowNull()]
         [String]$License
         )
@@ -22,7 +22,7 @@ function Add-SM.O365License {
                 $CurrentGroups
                 Foreach ($Group in $CurrentADGroups) {
                     Try { Remove-ADGroupMember -Identity $Group -Members $Identity -Confirm:$false 
-                        } Catch { Write-Host "[Could not remove $($Account.Name) from the office365 groups.]" }
+                        } Catch { Write-Host "[Could not remove $($Account.Name) from the Office365 groups.]" }
                     }
                 $CurrentGroups = $Account | Select -ExpandProperty MemberOf | findstr Office365
                 $VerifyADGroupRemoval = foreach ($group in $CurrentGroups) {
