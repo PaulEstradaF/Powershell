@@ -2,15 +2,15 @@ WorkFlow Start-ACS7Conversion {
     [CmdletBinding()]
     Param(       
         [Parameter(Mandatory=$True,
-                   HelpMessage="Enter the domain you will be joining. Example: SM")]
+                   HelpMessage="Enter the domain you will be joining. Example: Domain.Lan")]
         [String]$NewDomain,
 
         [Parameter(Mandatory=$True,
-                   HelpMessage="Enter the current Server Name. Example: SM0750P")]
+                   HelpMessage="Enter the current Server Name. Example: ServerName")]
         [string]$OldName,
 
         [Parameter(Mandatory=$True,
-                   HelpMessage="Enter the new Server Name. Example: SM0750POS")]
+                   HelpMessage="Enter the new Server Name. Example: ServerName")]
         [string]$NewName,
 
         [Parameter(Mandatory=$True,
@@ -62,7 +62,7 @@ WorkFlow Start-ACS7Conversion {
         [String]$NewDhcpScopeName,
 
         [Parameter(Mandatory=$True,
-                   HelpMessage="Enter the Start Range for the NEW Dhcp Scope. Example: 205.105.5.100",
+                   HelpMessage="Enter the Start Range for the NEW Dhcp Scope. Example: xxx.xxx.x.100",
                    ValueFromPipeLineByPropertyName=$True,
                    Position=0)]
         [ValidateScript({$_ -match [ipaddress]$_})]
@@ -70,7 +70,7 @@ WorkFlow Start-ACS7Conversion {
         [String]$DHCPStartRange,
 
         [Parameter(Mandatory=$True,
-                   HelpMessage="Enter the End Range for the NEW Dhcp Scope. Example: 205.105.5.100",
+                   HelpMessage="Enter the End Range for the NEW Dhcp Scope. Example: xxx.xxx.5.100",
                    ValueFromPipeLineByPropertyName=$True,
                    Position=0)]
         [ValidateScript({$_ -match [ipaddress]$_})]
@@ -157,7 +157,7 @@ WorkFlow Start-ACS7Conversion {
     Checkpoint-Workflow
 }
                
-Write-Verbose "Starting ACS 7 Conversion Changes."
+Write-Verbose "Starting  Conversion Changes."
                  
 Start-ACS7Conversion  -NewDomain None `
                       -AdminCred Dmi\Administrator `
@@ -176,7 +176,7 @@ Start-ACS7Conversion  -NewDomain None `
                       -ShowProgress `
                       -RenameServer 
 
-Write-Verbose "ACS7Rollout Workflow completed successfully."
+Write-Verbose "Rollout Workflow completed successfully."
 
 Pause
 
