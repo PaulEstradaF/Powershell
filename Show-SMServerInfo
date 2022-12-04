@@ -1,11 +1,11 @@
-function Show-SMServerInfo {
+function Show-ServerInfo {
     Start-Process Powershell.exe -ArgumentList {
         [Console]::WindowHeight='25'
         [Console]::WindowWidth='55'
         [Console]::BackgroundColor='Black'    
         Cls
         Write-Host " _____________________________________________________ " -BackgroundColor DarkRed -ForegroundColor White
-        Write-Host ' --------------ACS 7 Conversion Project------------- ' -BackgroundColor DarkRed -ForegroundColor White
+        Write-Host ' --------------Conversion Project------------- ' -BackgroundColor DarkRed -ForegroundColor White
         Write-Host " ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯ " -BackgroundColor DarkRed -ForegroundColor White
         Write-Host "                                                       "
         Write-Host " Current Server Information                            " -BackgroundColor DarkRed -ForegroundColor White
@@ -41,4 +41,4 @@ function Show-SMServerInfo {
         
 }
 
-Show-SMServerInfo 
+Show-ServerInfo 
