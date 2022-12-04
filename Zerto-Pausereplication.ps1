@@ -1,14 +1,13 @@
 <#.Synopsis
     Pauses replication when Nagios is reporting that a specific network
-    node in Yosemite Wholesale or Roseville DC is using a lot of 
+    node in organization distributoin center is using a lot of 
     incoming bandwidth.
 .DESCRIPTION
     The thresholds for bandwidth limit and time to wait before pausing
     are configured under ## Settings. This script creates a function, 
-    Get-SM.ReplicationStatus, that uses Get-SM.NagiosXiAPI, to check 
+    Get-ReplicationStatus, that uses Get-NagiosXiAPI, to check 
     the current status of the Nagios services that were specified:
-    YW_TPAC-Main-2951 : GigabitEthernet0/2 DS1IT-xxxxxxxx Bandwidth
-    ROS-TPAC-MAIN-2951.Network.Company.com : GigabitEthernet0/1 Bandwidth
+    name1, name2
     The function creates custom objects from the information gathered accessing
     the Nagios APIs. The script is preconfigured to have the Status as Good.
     While the status is Good it runs through a loop that checks Nagios to see
@@ -67,28 +66,28 @@ $Creds = Import-Credential -CredentialFilePath $CredentialPath -EncryptionKeyPat
 [int]$TimeThresholdRecovering = 2                                                              
 
 #Log information
-$Log = '\\Path\To\File\Zerto\Logs-PauseReplication\PauseReplication-RoseOnly.txt'
+$Log = '\\Path\To\File\Zerto\Logs-PauseReplication\PauseReplication-SpecificLocation.txt'
 $CurrentTime = Get-Date
 $LogThis = "[$($CurrentTime.ToShortDateString()) $($CurrentTime.ToLongTimeString())] Starting Script PauseReplication-RoseOnly.ps1. "
 $Logthis | Out-File $Log -Append
 
 # Loads the required module.                                                                    
-Import-Module 'C:\Program Files\WindowsPowerShell\Scripts\Get-SM.NagiosXiAPI.ps1'              
+Import-Module 'C:\Program Files\WindowsPowerShell\Scripts\Get-NagiosXiAPI.ps1'              
 ## End of Settings ############################################################################
 
-Function Get-SM.NagiosBandwidthStatus {
+Function Get-NagiosBandwidthStatus {
     # Nodes to Monitor. Uses the Nagios Host Name of the devices as well as the Service Name of the service we need monitored
     $Nodes = @{
         Rose = @{
-            "NagiosHostName"="ROS-TPAC-MAIN-2951.Network.Company.com";
+            "NagiosHostName"="NodeName";
             "NagiosServiceName"="GigabitEthernet0/1 Bandwidth"
-            "VPG"="Roseville DC"}
+            "VPG"="VPGName"}
     }
 
     Foreach ($Node in $Nodes.Keys) {
         $NagiosHost    = $Nodes[$Node]['NagiosHostName']
         $NagiosService = $Nodes[$Node]['NagiosServiceName']
-        $Expression    = "Get-SM.NagiosXIApi -Resource objects/servicestatus -Query `'host_name=$NagiosHost&name=$NagiosService`' | Select -Expand servicestatus "
+        $Expression    = "Get-NagiosXIApi -Resource objects/servicestatus -Query `'host_name=$NagiosHost&name=$NagiosService`' | Select -Expand servicestatus "
         $CheckNagios   = Invoke-Expression $Expression 
         $Props = [ordered]@{
             LastUpdated    = $CheckNagios.status_update_time
@@ -105,7 +104,7 @@ Function Get-SM.NagiosBandwidthStatus {
 $Status = 'Good'
 While ($Status -eq 'Good') {
 
-    $AllCurrentStatus = Get-SM.NagiosBandwidthStatus
+    $AllCurrentStatus = Get-NagiosBandwidthStatus
     $StartTimeGood = Get-Date
     
     Foreach ($CurrentStatus in $AllCurrentStatus) {
@@ -172,7 +171,7 @@ While ($Status -eq 'Good') {
                     Disconnect-ZertoServer
                     
                     While ($Status -eq 'Paused') {
-                        $CurrentStatusPaused = Get-SM.NagiosBandwidthStatus | Where NagiosHost -EQ $CurrentStatus.NagiosHost
+                        $CurrentStatusPaused = Get-NagiosBandwidthStatus | Where NagiosHost -EQ $CurrentStatus.NagiosHost
                         #log
                         $CurrentTime = Get-Date
                         $LogThis = "[$($CurrentTime.ToShortDateString()) $($CurrentTime.ToLongTimeString())] Current Status is Paused. Bandwidth Out: $($CurrentStatus.'Bw-Out(Mbps)')Mbps."
@@ -263,7 +262,7 @@ While ($Status -eq 'Good') {
                 }        
             } 
         Else { 
-            $CurrentStatusGood = Get-SM.NagiosBandwidthStatus | Where NagiosHost -EQ $CurrentStatus.NagiosHost 
+            $CurrentStatusGood = Get-NagiosBandwidthStatus | Where NagiosHost -EQ $CurrentStatus.NagiosHost 
             $props = [ordered]@{
                 'Status' = $Status
                 'Start' = $StartTimeGood.ToLongTimeString()
