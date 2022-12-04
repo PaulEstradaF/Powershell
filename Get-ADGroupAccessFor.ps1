@@ -1,4 +1,4 @@
-Function Get-SM.ADGroupAccessFor {
+Function Get-ADGroupAccessFor {
     [cmdletbinding()]
     Param(
     [Parameter(Mandatory=$True)][String[]]$Users
