@@ -1,10 +1,10 @@
-Function Get-SM.CitrixUserConnectionLog { 
+Function Get-CitrixUserConnectionLog { 
     [cmdletbinding()]
     Param( [Parameter(mandatory=$True)][String[]]$Names )
     
 
     Foreach ($Name in $Names) {
-        $ConnectionInfo = Get-BrokerConnectionLog -BrokeringUsername "SM\$Name" -MaxRecordCount 5000
+        $ConnectionInfo = Get-BrokerConnectionLog -BrokeringUsername "Domain\$Name" -MaxRecordCount 5000
                 
         Foreach ($Connection in $ConnectionInfo) {
             $Props = [Ordered]@{
