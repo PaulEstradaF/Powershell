@@ -1,5 +1,5 @@
-Function Load-SM.CitrixPowershell {
-$DLC01 = New-PSSession -ComputerName SMC-CitrixDLC01 -Name 'SMC-CitrixDLC01' -Credential (Get-Credential)
+Function Load-CitrixPowershell {
+$DLC01 = New-PSSession -ComputerName CitrixDLC01 -Name 'SMC-CitrixDLC01' -Credential (Get-Credential)
 Invoke-Command -Session $DLC01 -ScriptBlock {Import-Module Citrix*;Add-PSSnapin Citrix*}
 Import-PSSession $DLC01 -DisableNameChecking -ErrorAction SilentlyContinue -WarningAction SilentlyContinue | Out-Null
 
