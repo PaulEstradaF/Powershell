@@ -1,11 +1,11 @@
-Function Add-SM.O365MailboxAccess {
+Function Add-O365MailboxAccess {
 <#
 .SYNOPSIS
 	Adds delegated access to an Office365 Mailbox.
 .DESCRIPTION
 	This command allows you to grant any user(s) access to any mailbox(s). You can specify whether you want to grant full access or send as access. 
 .EXAMPLE
-	Add-SM.O365MailboxAccess -ToMailboxes mailbox1@domain.com -ForEmployeeIds 001,002,003,004 -AccessRights SendAs,FullAccess
+	Add-O365MailboxAccess -ToMailboxes mailbox1@domain.com -ForEmployeeIds 001,002,003,004 -AccessRights SendAs,FullAccess
 	
 #>
 
