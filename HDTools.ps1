@@ -42,7 +42,7 @@ function Show-HDToolsMainMenu {
 	Write-Host ""
 	Write-Host "From WorkStation                                                        " -ForegroundColor 'DarkRed'-backGroundColor 'White' 
 	Write-Host "  "
-	Write-Host "     [SM] SMLan Info         [domain2] domain2 Info      [SI] Store Info         " -ForegroundColor 'White'
+	Write-Host "     [SM] Domain1 Info         [domain2] domain2 Info      [SI] Store Info         " -ForegroundColor 'White'
 	Write-Host "     [HH] Shadow HH          [Dir] AD Directory      [RA] Remote Assistance  " -ForegroundColor 'White'
 	Write-Host "     [CTX] Citrix            [Slack] Slack Page      [Nagios] Nagios Page    " -ForegroundColor 'White'
 	Write-Host "     [IRIS] Reboot Server    [S401] Smart40x         [S402] Smart40x         " -ForegroundColor 'White'
@@ -70,7 +70,7 @@ function Show-HDToolsMainMenu {
 
 do {
 	Show-HDToolsMainMenu
-	[ValidateSet("Install", "Update", "SM", "SMAD2", "SI", "HH", "Dir+", "RA", "Slack", "Nagios", "Ctx", "Iris", "S401",`
+	[ValidateSet("Install", "Update", "Domain", "domain2", "SI", "HH", "Dir+", "RA", "Slack", "Nagios", "Ctx", "Iris", "S401",`
 	"S402", "PM", "1Off", "IW", "VL", "RDP", "PS", "SMS", "FMS", "DIR", "UCCX", "CS", "AS", "DHCP", "VNC", "TMS", "TSM",`
 	"ASW", "Tammy", "Quit", "VWL", "LBU", "RBC")]   
 	[String]$mainSel = Read-Host
@@ -151,7 +151,7 @@ do {
 			Write-Host ""
 			Write-Host ""
 			Write-Host ""
-			Get-ADUser -identity $smad2Login -server smad2.savemart.com -properties CanonicalName, department, title, PasswordExpired, LockedOut, PasswordLastSet, BadLogonCount, LastBadPasswordAttempt,  Office, ipPhone, OfficePhone, MobilePhone, MemberOf |
+			Get-ADUser -identity $domain2Login -server domain2.com -properties CanonicalName, department, title, PasswordExpired, LockedOut, PasswordLastSet, BadLogonCount, LastBadPasswordAttempt,  Office, ipPhone, OfficePhone, MobilePhone, MemberOf |
 			Select-Object -Property "Name", "Department", "Title", "CanonicalName", "PasswordExpired", "LockedOut", "PasswordLastSet", "BadLogonCount", "LastBadPasswordAttempt",  "Office", "OfficePhone", "ipPhone", "MobilePhone", "MemberOf"
 	}
 	'SI' {
@@ -244,8 +244,8 @@ do {
 	'S401'  { Start-Process -FilePath "C:\HDTool\Applications\Smart401.ws" }
 	'S402'  { Start-Process -FilePath "C:\HDTool\Applications\Smart402.ws" }
 	'PM'    { Start-Process -FilePath "C:\HDTool\Applications\Print Management.msc" }
-	'SMS'   { Start-Process -FilePath 'C:\HDTool\Applications\SaveMart Interscale' }
-	'FMS'   { Start-Process -FilePath 'C:\HDTool\Applications\FoodMaxx Interscale' }
+	'SMS'   { Start-Process -FilePath 'C:\HDTool\Applications\Location1 Interscale' }
+	'FMS'   { Start-Process -FilePath 'C:\HDTool\Applications\Location Interscale' }
 	'UCCX'  { Start-Process -FilePath 'C:\HDTool\Applications\Cisco Finesse' }
 	'CS'    { Start-Process -Filepath 'http://appurl.com' } #Cornerstone
 	'AS'    { Start-Process -Filepath 'http://appurl.com' } #Share Point Agent Assignments 
