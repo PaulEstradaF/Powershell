@@ -1,7 +1,7 @@
-Import-Module -Name \\corp-archive1\SystemAdmins\PowerShell\Commands\Connect-SM_O365.ps1
+Import-Module -Name \\path\PowerShell\Commands\Connect-O365.ps1
 $WarningPreference.value__ = 0
 
-Function Start-SM_ADSync {
+Function Start-ADSync {
     $startTime = Get-Date -Format hh:mm:ss
     Write-Host "Creating PSSession to ADConnect." -ForegroundColor Yellow
     $ADConnect = New-PSSession -Name ADConnect -ComputerName ADConnect -EnableNetworkAccess
@@ -29,12 +29,12 @@ Function Start-SM_ADSync {
 
 Write-Host "Creating PSSession to Microsoft Exchange 2013." -ForegroundColor Yellow
 $onPremExchange = New-PSSession -Name onPremExchange -ConfigurationName Microsoft.Exchange `
-    -ConnectionUri http://Corp-EXCas1.SM.LAN/PowerShell -Authentication Kerberos
+    -ConnectionUri http://servername\PowerShell -Authentication Kerberos
 Import-PSSession $onPremExchange -AllowClobber -ErrorAction SilentlyContinue -WarningAction SilentlyContinue |
     Out-Null
 
 #Store the data from ADUsers.csv in the $ADUsers variable
-$newUsers = Import-Excel -Path "Y:\SystemAdmins\Estrada\Projects\ONB script\Test_Run.xlsx" 
+$newUsers = Import-Excel -Path "Y:\netShare\Location\Projects\ONB script\Test_Run.xlsx" 
 $alreadyOnAD = [Ordered]@{}
 $notinAD = [Ordered]@{}
 
@@ -46,8 +46,8 @@ $Results = foreach ($User in $newUsers) {
         'Password'  = $User.Password ;
         'FirstName' = $User.First ;
         'LastName'  = $User.Last ;
-        'OU'        = "OU=ASM,OU=StoreUsers,OU=People,OU=-SaveMart-,DC=SM,DC=LAN" ;
-        'Email'     = $User.First + '.' + $User.Last + '@Savemart.com';
+        'OU'        = "OU=Name,OU=users,OU=People,OU=-dinaub-,DC=private,DC=LAN" ;
+        'Email'     = $User.First + '.' + $User.Last + '@domain.com';
         #'StreetAddress' = $User.StreetAddress ;
         'City'      = $User.City ;
         #'ZipCode'   = $User.ZipCode ;
@@ -79,7 +79,7 @@ foreach ($newUser in $notinAD.Keys) {
     Write-Host " [$CurrentTime] Creating account for $($obj.Firstname) $($Obj.Lastname). EmployeeID: $newUser." `
         -ForegroundColor DarkGreen
     $newUserInfo = $Results | Where EmployeeID -eq $newUser
-    $UPN = "$($newUserInfo.EmployeeID)@Savemart.com"
+    $UPN = "$($newUserInfo.EmployeeID)@domain.com"
     $newDisplayName = $NewUserInfo.FirstName + ' ' + $NewUserInfo.LastName
     #User does not exist then proceed to create the new user account                     
     #Account will be created in the OU provided by the $OU variable read from the CSV file
@@ -114,10 +114,10 @@ Start-SM_ADSync
 Write-Host "Please wait while verifying users are now synced to AAD."
 Start-Sleep -Seconds 90
 
-Write-Host "Gathering SM Lan Credentials." -ForegroundColor Cyan
-$onPremCred = Get-Credential -Message "Enter your SM Credentials. Example: SM\Employeeid" -UserName SM\91037 
+Write-Host "Gathering Domain Credentials." -ForegroundColor Cyan
+$onPremCred = Get-Credential -Message "Enter your SM Credentials. Example: domain\Employeeid" -UserName SM\91037 
 
-Connect-SM_O365
+Connect-O365
 Start-Sleep 3
 
 $ReadytoAddLicense = [Ordered]@{}
@@ -136,8 +136,8 @@ Foreach ($migratedUserID in $notinAD.keys) {
                 $EmailToMigrate = ($Results | where employeeiD -eq $migratedUserID).email
                 Write-Host "Migrating $EmailToMigrate." -ForegroundColor Cyan
 
-                New-MoveRequest -Identity "$emailToMigrate" -Remote -TargetDeliveryDomain 'SaveMartsupermarkets.mail.onmicrosoft.com' `
-                -RemoteHostName 'Webmail.SaveMart.com' -RemoteCredential $onPremCred -BadItemLimit 1000 `
+                New-MoveRequest -Identity "$emailToMigrate" -Remote -TargetDeliveryDomain 'domain.mail.onmicrosoft.com' `
+                -RemoteHostName 'Webmail.domain.com' -RemoteCredential $onPremCred -BadItemLimit 1000 `
                 -LargeItemLimit unlimited –AcceptLargeDataLoss -ErrorAction SilentlyContinue |
                 Out-null
 
@@ -170,7 +170,7 @@ foreach ($NeedsLicense in $ReadytoAddLicense.keys) {
         Write-Host "[$CurrentTime] Mailbox Migration for $NeedsLicense is complete!" -ForegroundColor Green
         $CurrentTime = Get-Date -Format hh:mm:ss
         Write-Host "[$CurrentTime] Adding F1 License." -ForegroundColor Cyan
-        Add-ADGroupMember -Identity 'Office365-F1-Store-ASM' -Members $migratedUserID
+        Add-ADGroupMember -Identity 'Office365-GroupName' -Members $migratedUserID
         }
 }
 
