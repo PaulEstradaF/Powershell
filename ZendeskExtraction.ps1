@@ -1,4 +1,4 @@
-$un = Read-Host -prompt "What is your SM Lan Account?"
+$un = Read-Host -prompt "What is your domain Account?"
 $fd = Read-Host -prompt "From Date"
 $td = Read-Host -Prompt "To Date'"
 (Get-Content C:\Users\$un\Desktop\ZenDesk\Export.json) | ConvertFrom-Json | 
