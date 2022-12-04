@@ -1,14 +1,14 @@
-Function Get-SM.MailboxPermissions {
+Function Get-MailboxPermissions {
     [cmdletbinding()]
     Param (
     [parameter(mandatory=$True)][String[]]$EmailAddresses
     )
     
     Foreach ($EmailAddress in $EmailAddresses) {    
-        $Users = Get-MailboxPermission $EmailAddress | Where User -like "*@savemart.com"
+        $Users = Get-MailboxPermission $EmailAddress | Where User -like "*@domain.com"
 
         Foreach ($User in $Users) {
-            $UserADInfo = (Get-ADUser -Identity $User.user.Trimend('@savemart.com') -Properties *)
+            $UserADInfo = (Get-ADUser -Identity $User.user.Trimend('@domain.com') -Properties *)
             $Props = [ordered]@{
                 EmployeeID = $UserADInfo.SamAccountName
                 User = $UserADInfo.Name
