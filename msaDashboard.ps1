@@ -26,7 +26,7 @@ $Form_msaDashboard = New-Object System.Windows.Forms.Form
 # This is referred to as a control, you have to add a line at the end to add the control
 # to the form
 $label_msaDashboard_Title = New-Object System.Windows.Forms.label
-    $label_msaDashboard_Title.Text = "The Save Mart Companies"
+    $label_msaDashboard_Title.Text = "OrgName"
     $label_msaDashboard_Title.Location = '10,10'
     $label_msaDashboard_Title.Size = '250,17'
     $label_msaDashboard_Title.ForeColor = 'White'
