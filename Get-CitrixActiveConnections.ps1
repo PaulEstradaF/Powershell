@@ -1,11 +1,11 @@
-Function Get-SM.CitrixActiveConnections {
+Function Get-CitrixActiveConnections {
     [Cmdletbinding()]
     Param([Switch]$ShowConnectionsByServer
     )
     if ($ShowConnectionsByServer) {
         Get-BrokerSession -MaxRecordCount 5000 | Where SessionState -eq Active -OutVariable BrokerSessions | Group DNSName |
                             Select @{n='CitrixHost';e={$_.Name}},@{n='Sessions';e={
-                                Foreach ($Server in $_.Name) {$CheckIfInMaintenaceMode = Get-BrokerMachine "SM\$($Server.Split('.sm.lan')[0])" |
+                                Foreach ($Server in $_.Name) {$CheckIfInMaintenaceMode = Get-BrokerMachine "SM\$($Server.Split('.domain.lan')[0])" |
                                     Select InMaintenanceMode
                                     if ($CheckIfInMaintenaceMode.InMaintanceMode -eq $True) {
                                     "InMaintenanceMode"
