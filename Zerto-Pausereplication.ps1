@@ -24,7 +24,7 @@
     Logging.
 .Notes
     This script requires API access to Nagios using a customized version of the
-    MrANagios modules. The modified function, Get-SM.NagiosXIApi, should be 
+    MrANagios modules. The modified function, Get-NagiosXIApi, should be 
     located in '$ENV:ProgramFiles\WindowsPowershell\Modules\'. This also script
     also needs to have the Zerto.PS.Commands installed using an exe that was 
     downloaded from a link provided by m.
@@ -206,7 +206,7 @@ While ($Status -eq 'Good') {
 
                             # While Status is Recovering
                             While ($Status -eq 'Recovering') {
-                                $CurrentStatusRecovering = Get-SM.NagiosBandwidthStatus | Where NagiosHost -EQ $CurrentStatus.NagiosHost 
+                                $CurrentStatusRecovering = Get-NagiosBandwidthStatus | Where NagiosHost -EQ $CurrentStatus.NagiosHost 
                                 #log
                                 $CurrentTime = Get-Date
                                 $LogThis = "[$($CurrentTime.ToShortDateString()) $($CurrentTime.ToLongTimeString())] Status was below the bw freshold for $TimeThresholdRecovering minutes Status Changed to Recovering. Bandwidth Out: $($CurrentStatus.'Bw-Out(Mbps)')Mbps."
