@@ -1,11 +1,11 @@
-function Run-SM.CitrixProfileReset {
+function Run-CitrixProfileReset {
     [Cmdletbinding()]
     param (
     [parameter(Mandatory=$True)]
     [String[]]$TargetUsers
     )
     Begin { 
-        $Verify_CitrixCommands = Try { Get-PSSession 'SMC-CitrixDLC01' } catch {
+        $Verify_CitrixCommands = Try { Get-PSSession 'CitrixDLC01' } catch {
             Write-Host "Could Not Verify That Citrix Commands Have Been Imported." -ForegroundColor DarkRed
             Write-Host "Please try importing the Citrix commands again." -ForegroundColor DarkRed
             }
@@ -15,7 +15,7 @@ function Run-SM.CitrixProfileReset {
             Write-Output ''
             Write-Host "[$TargetUser]"
             if ($Verify_CitrixCommands -ne $Null){
-                $Servers = (Get-SM.CitrixUserConnectionLog $TargetUser -ErrorAction SilentlyContinue | Group Citrixhost | Select Name).Name      
+                $Servers = (Get-CitrixUserConnectionLog $TargetUser -ErrorAction SilentlyContinue | Group Citrixhost | Select Name).Name      
                 $Profiles = @{}
                 $NoProfiles = @{}
                 Foreach ($Server in $Servers) {
@@ -34,7 +34,7 @@ function Run-SM.CitrixProfileReset {
                         $Time = Get-Date
                         Write-Host "[$($Time.ToLongTimeString())] Removing Local Profile on $Server" -ForegroundColor Cyan
                         Start-Process Powershell -ArgumentList "
-                            & '\\corp-archive1.sm.lan\SystemAdmins\PowerShell\Bat Files\DelProf2.exe' /C:$Server /id:$Targetuser /u
+                            & '\\networkShare\Bat Files\DelProf2.exe' /C:$Server /id:$Targetuser /u
                             " -PassThru | Out-Null
                         } 
                     } 
