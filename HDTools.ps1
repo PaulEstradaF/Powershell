@@ -1,11 +1,11 @@
 <#
     .SYNOPSIS
-    A collection of tools and links used by the The Save Mart Companies' IT Support team. 
+    A collection of tools and links used by the 'organization name'' IT Support team. 
     .DESCRIPTION
     This tool provides an interface for a collection of different tools used by the IT Support team.
     This tool provides easy access to AD user account information including last failed login attempt,
     lockout verification, unlocking, and resetting account passwords. Using the Store Info tool 
-    you can find anything from store or district manager name to field tech name and phone number. 
+    you can find anything from field tech name and phone number. 
     HDTools also includes three different directories, AD Phone directory, Cisco Unified Phone Directory,
     and a custom directory gathered from different agents. Links to all common support tools such as, 
     Citrix Director, Remote Assistance, Slack, UCCX, AS400, Scales. There are also web links to common web 
@@ -19,10 +19,10 @@
 
 
     Script Name	: HDTools.ps1
-    Description	: This script consolidates several different resources and tools that the Save Mart IT Help Desk uses Daily.
+    Description	: This script consolidates several different resources and tools that the Help Desk uses Daily.
     Author      : Paul Estrada
     Last Update	: 8/14/2018
-    Keywords	: Save Mart, Help Desk, Store Information, Active Directory Information
+    Keywords	: Help Desk, Store Information, Active Directory Information
     Reference   : 
 #>
 [Console]::Title='Help Desk Tools'
@@ -42,13 +42,13 @@ function Show-HDToolsMainMenu {
 	Write-Host ""
 	Write-Host "From WorkStation                                                        " -ForegroundColor 'DarkRed'-backGroundColor 'White' 
 	Write-Host "  "
-	Write-Host "     [SM] SMLan Info         [SMAD2] SMAD2 Info      [SI] Store Info         " -ForegroundColor 'White'
+	Write-Host "     [SM] SMLan Info         [domain2] domain2 Info      [SI] Store Info         " -ForegroundColor 'White'
 	Write-Host "     [HH] Shadow HH          [Dir] AD Directory      [RA] Remote Assistance  " -ForegroundColor 'White'
 	Write-Host "     [CTX] Citrix            [Slack] Slack Page      [Nagios] Nagios Page    " -ForegroundColor 'White'
-	Write-Host "     [IRIS] Reboot Server    [S401] Smart401         [S402] Smart402         " -ForegroundColor 'White'
+	Write-Host "     [IRIS] Reboot Server    [S401] Smart40x         [S402] Smart40x         " -ForegroundColor 'White'
 	Write-Host "     [PM] Printer Man.       [1Off] Kyle's 1Off      [IW] IngenWeb Page      " -ForegroundColor 'White'
 	Write-Host "     [VL] Register Logs      [RDP] RDP As Admin      [PS] Powershell         " -ForegroundColor 'White'
-	Write-Host "     [SMS] SM Scales         [FMS] FM Scales         [DIR+] Corp Directory   " -ForegroundColor 'White'
+	Write-Host "     [SMS]    Scales         [FMS] Scales            [DIR+] Corp Directory   " -ForegroundColor 'White'
 	Write-Host "     [UCCX] Cisco Finesse    [CS] Cornerstone        [AS] Agent Assignments  " -ForegroundColor 'White'
 	Write-Host "     [Unlock] Unlock AD      [RPW] Reset AD PW								 " -ForegroundColor 'White'
 	Write-Host " "
@@ -80,7 +80,7 @@ do {
 			cls
 			Write-Host " ______________________________________________________________________________" 
 			Write-Host " _________________________" -NoNewLine
-			Write-Host "[SM Lan Account Information]" -ForegroundColor 'DarkRed' -NoNewLine
+			Write-Host "[Account Information]" -ForegroundColor 'DarkRed' -NoNewLine
 			Write-Host "_________________________"         
 			Write-Host ""
 			Write-Host "" 
@@ -119,7 +119,7 @@ do {
 			cls
 			Write-Host " ______________________________________________________________________________" 
 			Write-Host " _________________________" -NoNewLine
-			Write-Host "[SMAD2 Account Information]" -ForegroundColor 'DarkRed' -NoNewLine
+			Write-Host "[Account Information]" -ForegroundColor 'DarkRed' -NoNewLine
 			Write-Host "__________________________"         
 			Write-Host ""
 			Write-Host "" 
@@ -234,10 +234,10 @@ do {
 			.\WLRemoteControl.exe /action:view /connect:tcpip /device:$HHIP
 			cd c:\
 	}
-	'Dir+'  { Start-Process -FilePath http://svdirsvc.intranet.savemart.com }
-	'Slack' { Start-Process -FilePath https://it-savemart.slack.com/messages }
-	'Nagios'{ Start-Process -FilePath http://nagios.intranet.savemart.com/check_mk/index.py?start_url=%2Fcheck_mk%2Fview.py%3Fview_name%3Dsvcproblems }
-	'IW'    { Start-Process -FilePath http://sm-iris-web.smad2.savemart.com/INGEN/Orders.aspx }
+	'Dir+'  { Start-Process -FilePath http://appurl.com }
+	'Slack' { Start-Process -FilePath http://appurl.com }
+	'Nagios'{ Start-Process -FilePath http://appurl.com }
+	'IW'    { Start-Process -FilePath http://appurl.com }
 	'Iris'  { Start-Process -Filepath 'C:\HDTool\Applications\HHTServer32Restart.exe' }
 	'RA'    { Start-Process -FilePath "C:\HDTool\Applications\RASupport.exe" }
 	'Ctx'   { Start-Process -FilePath 'C:\HDTool\Applications\Citrix Director' }
@@ -247,8 +247,8 @@ do {
 	'SMS'   { Start-Process -FilePath 'C:\HDTool\Applications\SaveMart Interscale' }
 	'FMS'   { Start-Process -FilePath 'C:\HDTool\Applications\FoodMaxx Interscale' }
 	'UCCX'  { Start-Process -FilePath 'C:\HDTool\Applications\Cisco Finesse' }
-	'CS'    { Start-Process -Filepath 'https://goo.gl/8XkRQO' } #Cornerstone
-	'AS'    { Start-Process -Filepath 'https://goo.gl/uxNnYk' } #Share Point Agent Assignments 
+	'CS'    { Start-Process -Filepath 'http://appurl.com' } #Cornerstone
+	'AS'    { Start-Process -Filepath 'http://appurl.com' } #Share Point Agent Assignments 
 	'1off' { 
 		Start-Process powershell.exe  -ArgumentList {
 			[Console]::WindowHeight='25'
@@ -314,7 +314,7 @@ do {
 
 <# Help Desk Tool Configuration Menu Starts #>
 	'Install' {
-			Net Use P: \\SM.LAN\DATA\Modesto\Departments\InformationTechnology\Private\SUPPORTCENTER
+			Net Use P: \\pathTo\InformationTechnology\Private\SUPPORTCENTER
 			if(!(Test-Path -Path C:\HDTools)) {
 			New-Item -Path C:\HDTools -ItemType Directory }
 			Copy-Item -path P:\HD\App\HDTools\* -destination C:\HDTools\ -recurse
@@ -322,7 +322,7 @@ do {
 			Net Use P: /Delete
 	}
 	'Update' {
-			Net Use P: \\SM.LAN\DATA\Modesto\Departments\InformationTechnology\Private\SUPPORTCENTER
+			Net Use P: \\pathTo\InformationTechnology\Private\SUPPORTCENTER
 			if(Test-Path -Path C:\HDTools) {
 			Remove-Item -Path C:\HDtools -recurse
 			New-Item -Path C:\HDTools -ItemType Directory}
@@ -333,15 +333,14 @@ do {
 
 <# Testing Starts #>
 	'Tammy' {
-	Start-Process -FilePath 'https://goo.gl/8XkRQO' #Cornerstone
-	Start-Process -FilePath 'https://goo.gl/uxNnYk' #Agent Assigments
-	Start-Process -FilePath 'https://goo.gl/c4F39N' #Connected Payments
-	Start-Process -Filepath 'https://goo.gl/CbfJqb' #UCCX
+	Start-Process -FilePath 'http://appurl.com' #Cornerstone
+	Start-Process -FilePath 'http://appurl.com' #Agent Assigments
+	Start-Process -FilePath 'http://appurl.com' #Connected Payments
+	Start-Process -Filepath 'http://appurl.com' #UCCX
 	}
 	'Unlock' { 	Function unlock-hdaccount {
 					$id = Read-host -prompt "What is the login id?"
-					unlock-adaccount -Identity $id -server corp-dc1
-					}
+					unlock-adaccount -Identity $id -server dc1					}
 				unlock-hdaccount
 				Write-output "The account $id has been unlocked." 
 	}
@@ -350,7 +349,7 @@ do {
 				$rpwnewpassword = Read-Host -prompt "Please provide a temporary password" -AsSecureString
 				Set-ADaccountpassword -identity $rpwid `
 									  -Newpassword $rpwnewpassword `
-									  -Server Corp-DC1 `
+									  -Server DC1 `
 									  -Confirm:$false `
 									  -Reset `
 									  -Verbose;
