@@ -1,7 +1,7 @@
 function Add-O365License {
     [cmdletbinding()]
     param(
-	    [Parameter(mandatory=$True,
+    	[Parameter(mandatory=$True,
         ValueFromPipeline=$True)]
 	    $Identity,
         [switch]$Remove,
