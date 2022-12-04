@@ -110,12 +110,12 @@ Remove-PSSession $onPremExchange | Out-Null
 Write-Output ''
 
 Start-Sleep 3
-Start-SM_ADSync
+Start-ADSync
 Write-Host "Please wait while verifying users are now synced to AAD."
 Start-Sleep -Seconds 90
 
 Write-Host "Gathering Domain Credentials." -ForegroundColor Cyan
-$onPremCred = Get-Credential -Message "Enter your SM Credentials. Example: domain\Employeeid" -UserName SM\91037 
+$onPremCred = Get-Credential -Message "Enter your  Credentials. Example: domain\Employeeid" -UserName Username 
 
 Connect-O365
 Start-Sleep 3
@@ -150,7 +150,7 @@ Foreach ($migratedUserID in $notinAD.keys) {
                 Start-Sleep -Seconds 30
                 $runCount += 1
                 if ($runCount -eq 4) { 
-                    Start-SM_ADSync
+                    Start-ADSync
                     }
                 }
     }
