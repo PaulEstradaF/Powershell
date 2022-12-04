@@ -1,11 +1,11 @@
 <#.Synopsis
-    AS400 to Active Directory Feed. Offboards and updates Manager,
+    Active Directory Feed. Offboards and updates Manager,
     Title, Position Code, Office Location, and Hire Date Active 
     Directory fields.
 
     The purpose of this script is to ensure that we have a central
     point for employee information that can flow to Active Directory,
-    FreshService, Ping SSO, and Office365/Azure environment (Delve
+    Ping SSO, and Office365/Azure environment (Delve
     and Address Book). 
 .DESCRIPTION
     This script relies on an automated process of exporting AS400
@@ -39,7 +39,7 @@
     The decrypted csv file that is created at the beginning of the
     script is deleted once it is stored in memory.
 
-    This process will be executed using PDQ to run from the Corp-UTIL1
+    This process will be executed using PDQ to run from the 'server name'
     server each night at 11:30PM. This script will create a log 
     with the user's account information prior to the change so that 
     they can be reverted if needed. That log will be encrypted.
@@ -60,7 +60,7 @@
         [5] Added items related to PingSSO (adding and removing from
             AD Group)
 .Link
-    https://Company.freshservice.com/itil/changes/107
+    
 #>
 ##Settings - UI Customization and script metrics
 $Host.UI.RawUI.BackgroundColor = 'Black'
@@ -71,7 +71,7 @@ Write-host "[$StartTime] [**] - Starting Infinium to Active Directory Script - [
 Write-Host "                                                                                      " -BackgroundColor 'DarkRed'
 
 ##Logs - Creates new file if non exists, renames file if larger than 20MB
-$LogFileLocation = "$ENV:ProgramData\Path\To\Logs\AS400ToInfinium.txt"
+$LogFileLocation = "$ENV:ProgramData\Path\To\Logs\LogFile.txt"
 $TestLogPath = Test-Path -Path $LogFileLocation
 
 If ($TestLogPath -eq $False) {
@@ -111,7 +111,7 @@ Try {
                                                     CanonicalName,DistinguishedName,emailAddress 
     $CurrentTime = Get-Date
     $ShortDate = $CurrentTime.ToShortDateString().Replace('/','')
-    $ADBackupClixml = "C:\ProgramData\Path\To\Logs\ADBackup\$ShortDate.ADBackup"
+    $ADBackupClixml = "C:\ProgramData\Path\To\Logs\Name\$ShortDate.Name"
     Try {
         $AdBackup | Export-Clixml -Path $ADBackupClixml -ErrorAction Stop 
         Write-host "[+] Successfully exported AD Back up information to $ADBackupClixml." -ForegroundColor Cyan
@@ -128,7 +128,7 @@ Try {
     Write-Output "[$CurrentTime] [-] Failed to gather AD User back up information." | Out-File $LogFileLocation -Append
 }
 
-##SFTP To Corp-Util
+##SFTP To 'server name'
 $CSVFileOnSFTP = '\\Path\To\File\File.csv.pgp'
 $EncryptedCSV = "$Env:ProgramData\Path\To\Encrypted\File.csv.pgp"
 $CurrentTime = Get-Date
@@ -140,7 +140,7 @@ $WINSFTFile = Test-Path "$CSVFileOnSFTP"
 if ($WINSFTFile -eq $True) {
     Write-Host "[+] File was found. Copying file to Server."
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [+] File was found. Copying file to Corp-Util1." | Out-File $logFileLocation -Append
+    Write-Output "[$CurrentTime] [+] File was found. Copying file to 'Server Name'." | Out-File $logFileLocation -Append
     Try {
         Copy-Item -Path $CSVFileOnSFTP -Destination $EncryptedCSV -Force -ErrorAction Stop
         Write-Host "[+] Successfully Copied $CSVFileOnSFTP to $EncryptedCSV." -ForeGroundcolor Cyan
@@ -227,65 +227,65 @@ Write-Host "[$CurrentTime] [~][~] Importing necessary custom Powershell commands
 Write-Output "[$CurrentTime] [~][~] Importing necessary custom Powershell commands." | Out-File $LogFileLocation -Append
 
 ##Modules - Required Custom Commands/Modules
-##~Import Load-SM.ExchangeCommands
+##~Import Load-ExchangeCommands
 Try {
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [!] Attempting to import Load-SM.ExchangeCommands.ps1" | Out-File $LogFileLocation -Append 
-    Import-Module \\Path\To\powershell\commands\Load-SM.ExchangeCommands.ps1 -ErrorAction Stop 
+    Write-Output "[$CurrentTime] [!] Attempting to import Load-ExchangeCommands.ps1" | Out-File $LogFileLocation -Append 
+    Import-Module \\Path\To\powershell\commands\Load-ExchangeCommands.ps1 -ErrorAction Stop 
     $CurrentTime = Get-Date
-    Write-Host "[+] Successfully imported Load-SM.ExchangeCommands.ps1." -ForeGroundcolor Cyan
-    Write-Output "[$CurrentTime] [+] Successfully Imported Load-SM.ExchangeCommands.ps1." | Out-File $LogFileLocation -Append
+    Write-Host "[+] Successfully imported Load-ExchangeCommands.ps1." -ForeGroundcolor Cyan
+    Write-Output "[$CurrentTime] [+] Successfully Imported Load-ExchangeCommands.ps1." | Out-File $LogFileLocation -Append
 }
 Catch { 
-    Write-host "[-] Failed to import the Load-SM.ExchangeCommands.ps1" -ForegroundColor Red 
+    Write-host "[-] Failed to import the Load-ExchangeCommands.ps1" -ForegroundColor Red 
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [-] Failed to import Load-SM.ExchangeCommands.ps1." | Out-File $LogFileLocation -Append
+    Write-Output "[$CurrentTime] [-] Failed to import Load-ExchangeCommands.ps1." | Out-File $LogFileLocation -Append
 }
-<##Run Load-SM.ExchangeCommands -- Disabled for now (No need to connect at this time)- PE
+<##Run Load-ExchangeCommands -- Disabled for now (No need to connect at this time)- PE
 $CurrentTime = Get-Date
-Write-Output "[$CurrentTime] - Attempting to run Load-SM.ExchangeCommands." | Out-File $LogFileLocation -Append
+Write-Output "[$CurrentTime] - Attempting to run Load-ExchangeCommands." | Out-File $LogFileLocation -Append
 Try { 
-    Load-SM.ExchangeCommands -ErrorAction Stop -WarningAction SilentlyContinue
+    Load-ExchangeCommands -ErrorAction Stop -WarningAction SilentlyContinue
     Clear-Host
     Write-Host "[[ Loaded On Prem Exchange Powershell Commands Successfully. ]]"
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] -- Successfully ran Load-SM.ExchangeCommands." | Out-File $LogFileLocation -Append
+    Write-Output "[$CurrentTime] -- Successfully ran Load-ExchangeCommands." | Out-File $LogFileLocation -Append
 }
 Catch { 
     Write-Host "Unable to load the on prem Exchange powershell commands."
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] -- Failed to run Load-SM.ExchangeCommands." | Out-File $LogFileLocation -Append 
+    Write-Output "[$CurrentTime] -- Failed to run Load-ExchangeCommands." | Out-File $LogFileLocation -Append 
 } 
 #>
 
-##~Import New-SM.o365RemoteMailbox.PS1
+##~Import New-o365RemoteMailbox.PS1
 Try { 
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [!] Attempting to import New-SM.o365RemoteMailbox.ps1." | Out-File $LogFileLocation -Append
-    Import-Module \\path\to\powershell\Commands\New-SM.o365RemoteMailbox.ps1 -ErrorAction Stop
+    Write-Output "[$CurrentTime] [!] Attempting to import New-o365RemoteMailbox.ps1." | Out-File $LogFileLocation -Append
+    Import-Module \\path\to\powershell\Commands\New-o365RemoteMailbox.ps1 -ErrorAction Stop
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [+] Successfully imported New-SM.o365RemoteMailbox.ps1." | Out-File $LogFileLocation -Append
-    Write-Host "[+] Successfully imported New-SM.O365RemoteMailbox.ps1" -ForeGroundcolor 'White'
+    Write-Output "[$CurrentTime] [+] Successfully imported New-o365RemoteMailbox.ps1." | Out-File $LogFileLocation -Append
+    Write-Host "[+] Successfully imported New-O365RemoteMailbox.ps1" -ForeGroundcolor 'White'
 }
 Catch { 
-    Write-Host "[!] Failed to import the New-SM.o365RemoteMailbox module." -ForegroundColor Red
+    Write-Host "[!] Failed to import the New-o365RemoteMailbox module." -ForegroundColor Red
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [] Failed to import New-SM.o365RemoteMailbox.ps1." | Out-File $LogFileLocation -Append
+    Write-Output "[$CurrentTime] [] Failed to import New-o365RemoteMailbox.ps1." | Out-File $LogFileLocation -Append
 }
 
-##~Import Start-SM_ADSync.PS1
+##~Import Start-ADSync.PS1
 Try {
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [!] Attempting to import Start-SM_ADSync.ps1." | Out-File $LogFileLocation -Append
-    Import-Module \\Path\To\powershell\Commands\Start-SM_ADSync.ps1 -ErrorAction Stop
+    Write-Output "[$CurrentTime] [!] Attempting to import Start-ADSync.ps1." | Out-File $LogFileLocation -Append
+    Import-Module \\Path\To\powershell\Commands\Start-ADSync.ps1 -ErrorAction Stop
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [+] Successfully imported Start-SM_ADSync.ps1." | Out-file $LogFileLocation -Append
-    Write-Host "[+] Successfully imported Start-SM_ADSync.ps1." -ForeGroundcolor 'Cyan'
+    Write-Output "[$CurrentTime] [+] Successfully imported Start-ADSync.ps1." | Out-file $LogFileLocation -Append
+    Write-Host "[+] Successfully imported Start-ADSync.ps1." -ForeGroundcolor 'Cyan'
 }
 Catch { 
     $CurrentTime = Get-Date
-    Write-Output "[$CurrentTime] [-] Failed to import Start-SM_ADSync.ps1." | Out-File $LogFileLocation -Append
-    Write-Host "[-] Failed to import Start-SM_ADSync.ps1." -ForeGroundcolor Red
+    Write-Output "[$CurrentTime] [-] Failed to import Start-ADSync.ps1." | Out-File $LogFileLocation -Append
+    Write-Host "[-] Failed to import Start-ADSync.ps1." -ForeGroundcolor Red
 }
 
 ##Gathers AD Information for each Employee ID from the CSV
@@ -425,7 +425,7 @@ foreach ($NewUser in $notInAD.keys) {
     $MailboxCreated = $False
     While ($MailboxCreated -eq $False) {
         Try { 
-            New-SM.O365RemoteMailbox -EmployeeID $NewUser -ErrorAction Stop | Out-Null
+            New-O365RemoteMailbox -EmployeeID $NewUser -ErrorAction Stop | Out-Null
             $CurrentTime = Get-Date
             Write-Output "[$CurrentTime] - Created remote mailbox for $newUser." | Out-File $LogFileLocation -Append
             $MailboxCreated = $True
@@ -442,31 +442,31 @@ foreach ($NewUser in $notInAD.keys) {
     $AddedtoPingGroup = $False
     While ($AddedtoPingGroup -eq $False) {
         Try { 
-            Add-ADGroupMember -Identity 'Ping SSO ' -Members $newUser
+            Add-ADGroupMember -Identity 'Ping ' -Members $newUser
             $CurrentTime = Get-Date
-            Write-Output "[$CurrentTime] - Added $Newuser to 'Ping SSOx' AD Group. " | Out-File $LogFileLocation -Append
+            Write-Output "[$CurrentTime] - Added $Newuser to 'Ping' AD Group. " | Out-File $LogFileLocation -Append
             $AddedtoPingGroup = $True
         }
         Catch { 
-            Write-Host "[Error] Could not add $NewUser to 'Ping SSO' AD Group." -ForegroundColor DarkCyan
+            Write-Host "[Error] Could not add $NewUser to 'Ping' AD Group." -ForegroundColor DarkCyan
             $CurrentTime = Get-Date
-            Write-Output "[$CurrentTime] - Could not add $NewUser to the 'Ping SSO ' AD Group." | Out-File $LogFileLocation -Append
+            Write-Output "[$CurrentTime] - Could not add $NewUser to the 'Ping ' AD Group." | Out-File $LogFileLocation -Append
         }
     }
 
-    ## Adds user to the 'Office365-F1' AD Group.
+    ## Adds user to the 'Office365' AD Group.
     $AddedToO365Group = $False
     While ($AddedToO365Group -eq $False) {
         Try {
-            Add-ADGroupMember -Identity 'Office365-F1' -Members $NewUser -ErrorAction Stop
+            Add-ADGroupMember -Identity 'Office365' -Members $NewUser -ErrorAction Stop
             $CurrentTime = Get-Date
-            Write-Output "[$CurrentTime] - Added $NewUser to the 'Office365-F1' AD Group." | Out-File $LogFileLocation -Append
+            Write-Output "[$CurrentTime] - Added $NewUser to the 'Office365' AD Group." | Out-File $LogFileLocation -Append
             $AddedToO365Group = $True
         }
         catch { 
-            Write-Host "[Error] Could not add $EmployeeID to 'Office365-F1' AD Group." -ForegroundColor DarkCyan
+            Write-Host "[Error] Could not add $EmployeeID to 'Office365' AD Group." -ForegroundColor DarkCyan
             $CurrentTime = Get-Date
-            Write-Output "[$CurrentTime] - Could not add $NewUser to the 'Office365-F1' AD Group." | Out-File $LogFileLocation -Append
+            Write-Output "[$CurrentTime] - Could not add $NewUser to the 'Office365' AD Group." | Out-File $LogFileLocation -Append
         }
     }  
 } 
@@ -520,7 +520,7 @@ foreach ($User in $updateAD.keys.TrimEnd()) {
     } Catch {
         $NewManagerInfo = $Null
         Write-Host "[-] Failed to gather information for $User's NEW Manager, $($CheckAccount.'Reports To')." -ForeGroundcolor Red
-        if ($user -eq '27002') {
+        if ($user -eq 'specialID') {
             $NewManagerInfo = Get-Aduser BOD -Properties *
         }
     } 
@@ -582,10 +582,10 @@ foreach ($User in $updateAD.keys.TrimEnd()) {
             }
             ##Offboarding - Moves to Offboarded OU
             Try {
-                Move-ADObject -Identity $CurrentADUserInfo.DistinguishedName -TargetPath "OU=Infinium Feed,OU=Offboard,OU=-SaveMart-,DC=SM,DC=LAN" -ErrorAction Stop
-                Write-Host "[!] Moved $user's account to 'OU=Infinium Feed,OU=Offboard...'" -ForeGroundcolor DarkCyan
+                Move-ADObject -Identity $CurrentADUserInfo.DistinguishedName -TargetPath "OU=Feed,OU=Offboard,OU=-Domain,DC=Private,DC=LAN" -ErrorAction Stop
+                Write-Host "[!] Moved $user's account to 'OU=Feed,OU=Offboard...'" -ForeGroundcolor DarkCyan
                 $CurrentTime = Get-Date
-                Write-Output "[$CurrentTime] [!] Moved $user's account to 'OU=Infinium Feed,OU=Offboard...'" | Out-File $logFileLocation -Append
+                Write-Output "[$CurrentTime] [!] Moved $user's account to 'OU=Feed,OU=Offboard...'" | Out-File $logFileLocation -Append
             }
             Catch {
                 $CurrentTime = Get-Date
@@ -604,17 +604,17 @@ foreach ($User in $updateAD.keys.TrimEnd()) {
                 Write-Host "[-] Failed to add Term Date to $User's disabled account." -ForeGroundcolor Red
                 Write-Output "[$CurrentTime] [-] Failed to add Term Date to $User's disabled account." | Out-File $LogFileLocation -Append
             }
-            ##Offboarding - Removes from 'Ping SSO ' group
+            ##Offboarding - Removes from 'Ping' group
             Try {
-                Remove-ADGroupMember -Identity 'Ping SSO' -Members $User -Confirm:$False -ErrorAction Stop 
+                Remove-ADGroupMember -Identity 'Ping' -Members $User -Confirm:$False -ErrorAction Stop 
                 $CurrentTime = Get-Date
-                Write-Output "[$CurrentTime] [!] Removed $User from 'Ping SSO ' AD Group." | Out-File $LogFileLocation -Append
-                Write-Host "[!] Removed $User from 'Ping SSO Corp Annex' AD Group." -ForeGroundcolor DarkCyan
+                Write-Output "[$CurrentTime] [!] Removed $User from 'Ping ' AD Group." | Out-File $LogFileLocation -Append
+                Write-Host "[!] Removed $User from 'Ping 2' AD Group." -ForeGroundcolor DarkCyan
             }
             Catch {
-                Write-Host "[-] Failed to remove $User from 'Ping SSO '. Please do this step manually." -ForegroundColor Red
+                Write-Host "[-] Failed to remove $User from 'Ping '. Please do this step manually." -ForegroundColor Red
                 $CurrentTime = Get-Date
-                Write-Output "[$CurrentTime] [-] Failed to remove $User from 'Ping SSO '. Please do this step manually." | Out-File $LogFileLocation -Append
+                Write-Output "[$CurrentTime] [-] Failed to remove $User from 'Ping '. Please do this step manually." | Out-File $LogFileLocation -Append
             }
         }
         ## If the account is already disabled, no changes are made.
@@ -745,7 +745,7 @@ foreach ($User in $updateAD.keys.TrimEnd()) {
              }
             ## Moves Re-enabled account to Re-enabled OU.
             Try { 
-#DT             Move-ADObject -Identity $ReEnableAccount.DistinguishedName -TargetPath "OU=Re-Enabled Accounts,OU=NewUsers,OU=People,OU=-SaveMart-,DC=SM,DC=LAN" -ErrorAction Stop
+#DT             Move-ADObject -Identity $ReEnableAccount.DistinguishedName -TargetPath "OU=Re-Enabled Accounts,OU=NewUsers,OU=People,OU=-Domain-,DC=private,DC=LAN" -ErrorAction Stop
                 $CurrentTime = Get-Date
                 Write-Output "[$CurrentTime] [+] Moved $User to 'Re-Enabled Accounts' OU." | Out-File $LogFileLocation -Append
                 Write-Host "[+] Moved $User to 'OU=Re-Enabled Accounts,OU=NewUsers...'" -ForeGroundcolor Cyan
@@ -772,8 +772,8 @@ foreach ($User in $updateAD.keys.TrimEnd()) {
 }
 
 <# After accounts are created a manual sync from AD to o365 kicks off.  
-#Try { Start-SM_ADSync -ErrorAction Stop }
-#Catch { Write-Host "[Error] Could not start SM AD Sync to o365." -ForegroundColor DarkCyan }
+#Try { Start-ADSync -ErrorAction Stop }
+#Catch { Write-Host "[Error] Could not start AD Sync to o365." -ForegroundColor DarkCyan }
 #>
 
 ##~> Removes PSSession to Office365.
