@@ -1,4 +1,4 @@
-Function Get-SM.CitrixServerFor { 
+Function Get-CitrixServerFor { 
     [cmdletbinding()]
     Param( [Parameter(mandatory=$True)][String[]]$Names )
     
